@@ -351,6 +351,28 @@ function mod:SPELL_SUMMON(args)
 	end
 end
 
+local lastSpirit = 0
+function mod:SPELL_SUMMON(args)
+	if args:IsSpellID(71426) then -- Summon Vengeful Shade
+		if time() - lastSpirit > 5 then
+			warnSummonSpirit:Show()
+			timerSummonSpiritCD:Start()
+			lastSpirit = time()
+			mod:Schedule(0.5, checkSpiritTarget)
+		end
+	end
+end
+
+function checkSpiritTarget()
+	isTanking = UnitDetailedThreatSituation("player", "target")
+	if UnitThreatSituation("player")==3 and not isTanking then
+		specWarnVengefulShade:Show()
+		SendChatMessage("SPIRIT IN ME!", "SAY")
+	elseif time() - lastSpirit < 4 then
+		mod:Schedule(0.15, checkSpiritTarget)
+	end
+end
+
 function mod:SWING_DAMAGE(sourceGUID, _, _, destGUID)
 	if destGUID == UnitGUID("player") and self:GetCIDFromGUID(sourceGUID) == 38222 then
 		specWarnVengefulShade:Show()
